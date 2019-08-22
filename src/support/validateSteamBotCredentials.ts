@@ -1,6 +1,7 @@
 import { createHash } from "crypto"
 import { wait } from "../api/support/wait"
-const { SteamClient, SteamUser, EResult } = require("steam")
+//const { SteamClient, SteamUser, EResult, servers } = require("steam")
+const Steam = require('steam')
 
 interface Response {
 	success: boolean
@@ -16,8 +17,9 @@ export const validateBotCredentials = (
 	steamGuardCode?: string
 ) =>
 	new Promise<Response>((resolve, reject) => {
-		const steamClient = new SteamClient()
-		const steamUser = new SteamUser(steamClient)
+		const steamClient = new Steam.SteamClient()
+		const steamUser = new Steam.SteamUser(steamClient)
+		const EResult = Steam.EResult
 
 		const cleanUp = () => {
 			console.log("Steam client disconnected")
@@ -26,6 +28,7 @@ export const validateBotCredentials = (
 		}
 
 		console.log(`Beginning bot credentials validation for bot ${user}`)
+		
 
 		steamClient.on("error", (err: any) => {
 			reject(err)
@@ -122,6 +125,20 @@ export const validateBotCredentials = (
 		steamClient.connect()
 
 		let timeout = setTimeout(() => {
+
+			console.log(`/!\\ the request timed out
+			node-steam fetches a list of steam servers while the module at prepare 
+			(https://github.com/seishun/node-steam#servers)
+			
+			the servers currently used are:
+			
+			${JSON.stringify(Steam.servers, null, '\t')}
+
+			this list was fetched from https://api.steampowered.com/ISteamDirectory/GetCMList/v1/?cellid=0
+			in the past, so it may have changed
+
+			`)
+
 			reject(new Error("Steam credentials verification timed out"))
 			cleanUp()
 		}, 20000)

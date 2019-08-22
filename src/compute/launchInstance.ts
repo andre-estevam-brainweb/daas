@@ -1,8 +1,12 @@
 import { getEC2 } from "./getEC2"
 import { poll } from "./poll"
-import {oneLine} from "common-tags"
+import { oneLine } from "common-tags"
+//const spawn = require('child_process').spawn
 
 export async function launchComputeInstance(command: string, machineName: string) {
+
+
+
 	const { LOG_TRANSMISSION_ADDRESS, LOG_TRANSMISSION_PORT_CORE } = process.env
 
 	const logTransmissionCommand =
@@ -10,14 +14,25 @@ export async function launchComputeInstance(command: string, machineName: string
 			? ` 2>&1 | nc ${LOG_TRANSMISSION_ADDRESS} ${LOG_TRANSMISSION_PORT_CORE}`
 			: ""
 
+	/*onst logTransmissionCommand =
+		(LOG_TRANSMISSION_PORT_CORE)
+			? ` 2>&1 | nc -lvp ${LOG_TRANSMISSION_PORT_CORE}`
+			: ""
+			*/
+
 	const id = await runInstance(
 		oneLine`sudo docker run
 			-e DATABASE_URL="${process.env.DATABASE_URL}"
 			"${process.env.DOCKER_REPO}"
 			${command}${logTransmissionCommand}`,
-			machineName
+		machineName
 	)
 	await waitForInstanceRunning(id)
+}
+
+export const runInstanceWrapper = (command: string, machineName: string) => {
+	console.log(`Running the command "${command}" onto the machine "${machineName}"`)
+	return runInstance(command, machineName)
 }
 
 export const runInstance = (command: string, machineName: string) =>
@@ -34,10 +49,14 @@ export const runInstance = (command: string, machineName: string) =>
 						Tags: [
 							{
 								Key: "Name",
-								Value: `DM - ${machineName}`
+								Value: `CORE_BOT_DAAS # ${machineName}`
 							}
 						]
 					}
+				],
+				SecurityGroupIds: [
+					"sg-3c969c5b", //default
+					"sg-09c3cdf4c86a0c719",//brainweb-allowance
 				],
 				UserData: new Buffer(
 					[
@@ -81,8 +100,40 @@ export const waitForInstanceRunning = (instanceId: string) =>
 							if (
 								data.Reservations![0].Instances![0].State!.Name === "running"
 							) {
+								console.log(`The instance with id ${instanceId} is running`)
+
+								console.log(`PRIVATE IP: ${data.Reservations![0].Instances![0].PrivateIpAddress}`)
+								console.log(`PUBLIC IP:  ${data.Reservations![0].Instances![0].PublicIpAddress}`)
+
+								//console.log(JSON.stringify(data, null, ' '))
+								/*
+								const publicIp = data.Reservations![0].Instances![0]!.PublicIpAddress
+								if (publicIp) {
+				
+									const name = instanceId
+									const nc = spawn('nc', ['-l', '-v', publicIp, process.env.LOG_TRANSMISSION_PORT_CORE || 6002]);
+
+									nc.stdout.on('data',  (data : string) => {
+										console.log(`${name} | ${data}`);
+									});
+
+									nc.stderr.on('data', (data : string) => {
+										console.log(`${name} [STDERR] |  ${data}`);
+									});
+
+									nc.on('exit', (code : string) => {
+										console.log(`${name} | child process exited with code ` + code.toString());
+									});
+
+									nc.on('error', ( err : any)=>{ 
+										console.log(`Netcat error`, err)
+									})
+								}
+								*/
+
 								resolve()
 							} else {
+								console.log(`Waiting the startup EC2 with id ${instanceId}`)
 								reject(retry)
 							}
 						}
@@ -90,7 +141,8 @@ export const waitForInstanceRunning = (instanceId: string) =>
 				)
 			),
 		{
-			retryIntervalInSeconds: 1,
+			retryIntervalInSeconds: 3,
 			maxTries: 60
 		}
 	)
+

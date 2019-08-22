@@ -32,7 +32,8 @@ async function maintainActiveMachines() {
 
 	const difference = idleMachines.length - alwaysActiveMachines
 
-	console.log(`There is a difference of ${difference}`)
+	console.log(`IDLE_MACHINES: ${idleMachines.length}\nAWAYS_ACTIVE_MACHINES: ${alwaysActiveMachines}\n
+	(i) There is a difference of ${difference}`)
 
 	if (difference < 0) {
 		// We have less active machines than we want to. Spawn one more.
