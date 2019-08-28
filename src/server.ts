@@ -7,16 +7,20 @@ let server: Server | null = null
 
 app.use("/api/v1", api)
 
-export const launchServer = () =>
+export const launchServer = () => {
+	console.log(`Launching DaaS Server...`)
 	new Promise(resolve => {
 		server = app.listen(+process.env.PORT!, () => {
 			console.log(`Server is ready in port: ${process.env.PORT}`)
 			resolve()
 		})
 	})
+}
 
-export const closeServer = () =>
-	new Promise(resolve => {
+
+export const closeServer = () => {
+	console.log(`Stopping DaaS Server...`)
+	return new Promise(resolve => {
 		if (server) {
 			server.close(() => {
 				server = null
@@ -27,3 +31,5 @@ export const closeServer = () =>
 			resolve()
 		}
 	})
+}
+

@@ -19,7 +19,10 @@ export async function createFirstApiKeyIfNeeded() {
 		})
 
 		console.log(stripIndents`
-		
+
+
+		=================================================================================
+
 		${chalk.black.bold.bgRed("PLEASE READ THIS!")}
 		
 		An admin API Key has been generated because this is the first time you're
@@ -36,6 +39,12 @@ export async function createFirstApiKeyIfNeeded() {
 		that you use it in the system you're going to integrate with DaaS. Instead,
 		generate another key using only the privileges that your system is going to
 		need.
+
+		=================================================================================
+
+
 		`)
+	}else{
+		console.log(`No api key creation is needed`)
 	}
 }

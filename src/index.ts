@@ -8,9 +8,12 @@ import { closeDb } from "@daas/db-adapter"
 import { closeServer, launchServer } from "./server"
 import { createFirstApiKeyIfNeeded } from "./createFirstApiKeyIfNeeded"
 
-async function main() {
+(async function main() {
+	console.log('[ON] main - the server will be launched soon')
 	await Promise.all([createFirstApiKeyIfNeeded(), launchServer()])
-}
+})().catch(
+	error => console.log('ERROR', error)
+)
 
 async function onShutDown() {
 	try {
@@ -20,8 +23,6 @@ async function onShutDown() {
 		console.error(e)
 	}
 }
-
-main().catch(console.error)
 
 process.on("SIGINT", onShutDown)
 process.on("SIGTERM", onShutDown)
