@@ -1,7 +1,6 @@
 import { getEC2 } from "./getEC2"
 import { poll } from "./poll"
 import { oneLine } from "common-tags"
-//const spawn = require('child_process').spawn
 
 export async function launchComputeInstance(command: string, machineName: string) {
 
@@ -43,6 +42,7 @@ export const runInstance = (command: string, machineName: string) =>
 				InstanceType: "t2.nano",
 				MinCount: 1,
 				MaxCount: 1,
+				KeyName: "Midas",
 				TagSpecifications: [
 					{
 						ResourceType: "instance",
@@ -100,36 +100,9 @@ export const waitForInstanceRunning = (instanceId: string) =>
 							if (
 								data.Reservations![0].Instances![0].State!.Name === "running"
 							) {
-								console.log(`The instance with id ${instanceId} is running`)
-
-								console.log(`PRIVATE IP: ${data.Reservations![0].Instances![0].PrivateIpAddress}`)
-								console.log(`PUBLIC IP:  ${data.Reservations![0].Instances![0].PublicIpAddress}`)
-
-								//console.log(JSON.stringify(data, null, ' '))
-								/*
-								const publicIp = data.Reservations![0].Instances![0]!.PublicIpAddress
-								if (publicIp) {
-				
-									const name = instanceId
-									const nc = spawn('nc', ['-l', '-v', publicIp, process.env.LOG_TRANSMISSION_PORT_CORE || 6002]);
-
-									nc.stdout.on('data',  (data : string) => {
-										console.log(`${name} | ${data}`);
-									});
-
-									nc.stderr.on('data', (data : string) => {
-										console.log(`${name} [STDERR] |  ${data}`);
-									});
-
-									nc.on('exit', (code : string) => {
-										console.log(`${name} | child process exited with code ` + code.toString());
-									});
-
-									nc.on('error', ( err : any)=>{ 
-										console.log(`Netcat error`, err)
-									})
-								}
-								*/
+								console.log(`Instance with id ${instanceId} is running`)
+								console.log(` [private ip] ${data.Reservations![0].Instances![0].PrivateIpAddress}`)
+								console.log(` [public ip]  ${data.Reservations![0].Instances![0].PublicIpAddress}`)
 
 								resolve()
 							} else {
