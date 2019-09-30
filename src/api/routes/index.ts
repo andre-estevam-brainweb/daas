@@ -10,8 +10,8 @@ import { webhooks } from "./webhooks"
 const router = Router()
 
 router.use(jsonParser())
-router.use(authenticate)
 
+router.use(authenticate)
 router.use("/apiKeys", apiKeys)
 router.use("/bots", bots)
 router.use("/lobbies", lobbies)
